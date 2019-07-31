@@ -223,6 +223,7 @@ microexec (ReadMem target) = do
     x <- readByte
     case target of
         ValueBuf -> setReg1 x
+        Register r -> setReg r x
         AddrBuf -> do
             (y, _) <- twist <$> getReg2
             setReg2 $ bitCoerce (x, y)
@@ -232,6 +233,7 @@ microexec (ReadMem target) = do
 microexec (WriteMem target) = do
     tellWrite =<< case target of
         ValueBuf -> getReg1
+        Register r -> getReg r
         AddrBuf -> do
             (v, addr') <- twist <$> getReg2
             setReg2 addr'

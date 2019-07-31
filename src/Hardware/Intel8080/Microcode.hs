@@ -69,12 +69,11 @@ data ALU0
 data Target
     = ValueBuf
     | AddrBuf
+    | Register Reg
     | PC
     deriving (Show, Generic, Undefined)
 
 type MacroSteps ends n = Star ends n Effect
-
-imm1 = Step @(Just IncrPC) @Nothing (ReadMem ValueBuf) >:> End
 
 imm2 =
     Step @(Just IncrPC) @Nothing (ReadMem AddrBuf) >:>
@@ -111,7 +110,7 @@ mc ops = let (first, ops') = stepsOf ops
          in (first, ops' ++ pure (When Nothing, Nothing))
 
 evalSrc src k = case src of
-    Imm -> mc $ imm1 >++> k
+    Imm -> mc $ Step @(Just IncrPC) @Nothing (ReadMem ValueBuf) >:> k
     Op (Reg r) -> mc $ Step @Nothing @Nothing (Get r) >:> k
     Op AddrHL -> mc $
         Step @Nothing @Nothing (Get2 rHL) >:>
@@ -181,23 +180,19 @@ microcode (RETIf cond) = mc $
     End
 microcode LDA = mc $
     imm2 >++>
-    Step @(Just Indirect) @Nothing (ReadMem ValueBuf) >:>
-    Step @Nothing @Nothing (Set rA) >:>
+    Step @(Just Indirect) @Nothing (ReadMem $ Register rA) >:>
     End
 microcode STA = mc $
     imm2 >++>
-    Step @Nothing @Nothing (Get rA) >:>
-    Step @Nothing @(Just Indirect) (WriteMem ValueBuf) >:>
+    Step @Nothing @(Just Indirect) (WriteMem $ Register rA) >:>
     End
 microcode (LDAX rp) = mc $
     Step @Nothing @Nothing (Get2 rp) >:>
-    Step @(Just Indirect) @Nothing (ReadMem ValueBuf) >:>
-    Step @Nothing @Nothing (Set rA) >:>
+    Step @(Just Indirect) @Nothing (ReadMem $ Register rA) >:>
     End
 microcode (STAX rp) = mc $
     Step @Nothing @Nothing (Get2 rp) >:>
-    Step @Nothing @Nothing (Get rA) >:>
-    Step @Nothing @(Just Indirect) (WriteMem ValueBuf) >:>
+    Step @Nothing @(Just Indirect) (WriteMem $ Register rA) >:>
     End
 microcode (DCX rp) = mc $
     Step @Nothing @Nothing (Get2 rp) >:>
@@ -260,19 +255,15 @@ microcode SPHL = mc $
     End
 microcode LHLD = mc $
     imm2 >++>
-    Step @(Just Indirect) @Nothing (ReadMem ValueBuf) >:>
-    Step @Nothing @Nothing (Set rL) >:>
+    Step @(Just Indirect) @Nothing (ReadMem $ Register rL) >:>
     Step @Nothing @Nothing (Compute2 Inc2 KeepC) >:>
-    Step @(Just Indirect) @Nothing (ReadMem ValueBuf) >:>
-    Step @Nothing @Nothing (Set rH) >:>
+    Step @(Just Indirect) @Nothing (ReadMem $ Register rH) >:>
     End
 microcode SHLD = mc $
     imm2 >++>
-    Step @Nothing @Nothing (Get rL) >:>
-    Step @Nothing @(Just Indirect) (WriteMem ValueBuf) >:>
+    Step @Nothing @(Just Indirect) (WriteMem $ Register rL) >:>
     Step @Nothing @Nothing (Compute2 Inc2 KeepC) >:>
-    Step @Nothing @Nothing (Get rH) >:>
-    Step @Nothing @(Just Indirect) (WriteMem ValueBuf) >:>
+    Step @Nothing @(Just Indirect) (WriteMem $ Register rH) >:>
     End
 microcode XTHL = mc $
     pop2 >++>
@@ -298,12 +289,10 @@ microcode XCHG = mc $
     End
 microcode IN = mc $
     Step @(Just IncrPC) @Nothing (ReadMem AddrBuf) >:>
-    Step @(Just 'Port) @Nothing (ReadMem ValueBuf) >:>
-    Step @Nothing @Nothing (Set rA) >:>
+    Step @(Just 'Port) @Nothing (ReadMem $ Register rA) >:>
     End
 microcode OUT = mc $
     Step @(Just IncrPC) @Nothing (ReadMem AddrBuf) >:>
-    Step @Nothing @Nothing (Get rA) >:>
-    Step @Nothing @(Just 'Port) (WriteMem ValueBuf) >:>
+    Step @Nothing @(Just 'Port) (WriteMem $ Register rA) >:>
     End
 -- -- microcode instr = errorX $ show instr
