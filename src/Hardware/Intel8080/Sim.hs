@@ -8,6 +8,9 @@ import Clash.Prelude hiding (lift)
 
 import RetroClash.Barbies
 import RetroClash.CPU
+import Barbies
+import Barbies.Bare
+import Data.Monoid (Last)
 
 import Control.Monad.State
 import Data.Foldable (traverse_, for_)
@@ -53,12 +56,12 @@ world World{..} CPUOut{..} = do
 
     port = truncateB _addrOut
 
-sim :: (Monad m) => (CPUState -> World m) -> StateT (Pure CPUIn, CPUState, Maybe IRQ) m ()
+sim :: (Monad m) => (CPUState -> World m) -> StateT (Pure CPUIn, (CPUState, Barbie (CPUOut Covered) Last), Maybe IRQ) m ()
 sim mkWorld = do
     inp <- use _1
-    s <- use _2
+    so@(s, _) <- use _2
 
-    let (out, s') = runState (cpuMachine inp) s
+    let (out, s') = runState (cpuMachine inp) so
     inp' <- zoom _3 $ world (mkWorld s) out
     _1 .= inp'
     _2 .= s'
