@@ -33,8 +33,8 @@ runTest romFile = banner romFile $ do
                 if i `elem` [0, 1, 2, 3, 7] then Just <$> readMem_ addr
                   else return Nothing
             writeMem addr = writeArray arr (fromIntegral addr) . fromIntegral
-            inPort = inTestPort readMem_ (_registers s !!)
-            outPort = outTestPort (writeIORef finished True)
+            inPort r = Just <$> inTestPort readMem_ (_registers s !!) r
+            outPort r x = Just <$> outTestPort (writeIORef finished True) r x
 
     let runSim act = evalStateT act ((0 :: Unsigned 3), (initInput, (initState{ _pc = 0x0100 }, mempty), Nothing))
     runSim $ whileM_ (liftIO $ not <$> readIORef finished) $ do

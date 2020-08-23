@@ -59,12 +59,12 @@ world World{..} CPUOut{..} = do
 sim :: (Monad m) => (CPUState -> World m) -> StateT (Pure CPUIn, (CPUState, Barbie (CPUOut Covered) Last), Maybe IRQ) m ()
 sim mkWorld = do
     inp <- use _1
-    so@(s, _) <- use _2
+    so@(s, out) <- use _2
 
-    let (out, s') = runState (cpuMachine inp) so
-    inp' <- zoom _3 $ world (mkWorld s) out
+    let so'@(s', out) = execState (cpuMachine inp) so
+    inp' <- zoom _3 $ world (mkWorld s') (update (defaultOut s') out)
     _1 .= inp'
-    _2 .= s'
+    _2 .= so'
 
 interrupt :: (Monad m) => Unsigned 3 -> StateT (Maybe IRQ) m ()
 interrupt v = put $ Just $ NewIRQ rst

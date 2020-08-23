@@ -155,17 +155,12 @@ fetch inp = do
     pc += 1
     return x
 
-cpuMachine :: Pure CPUIn -> State (CPUState, Barbie (CPUOut Covered) Last) (Pure CPUOut)
-cpuMachine inp = do
-    (s0, out0) <- get
-    (x, out) <- zoom _1 $ runWriterT . runMaybeT $ cpu inp
-    case x of
-        Nothing -> do
-            _1 .= s0
-            return $ update (defaultOut s0) out0
-        Just () -> do
-            _2 .= out
-            uses _1 $ \s -> update (defaultOut s) out
+cpuMachine :: Pure CPUIn -> State (CPUState, Partial CPUOut) ()
+cpuMachine = stallable (bpure (Const True)) . cpu
+  where
+    mask = (bpure $ Const False)
+        { _addrOut = Const True
+        }
 
 cpu :: Pure CPUIn -> M ()
 cpu inp@CPUIn{..} = do
