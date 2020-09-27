@@ -4,6 +4,7 @@ module Hardware.Intel8080 where
 import Prelude ()
 -- import Data.Word
 import Clash.Prelude
+import qualified Language.Haskell.TH.Lift as TH
 
 type Reg = Index 8
 
@@ -20,7 +21,7 @@ pattern RL = 5
 data RegPair
     = Regs Reg Reg
     | SP
-    deriving (Eq, Ord, Show, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Generic, NFDataX, TH.Lift)
 
 pattern RAF, RBC, RDE, RHL :: RegPair
 pattern RAF = Regs RA RFlags
@@ -53,13 +54,13 @@ data RHS
     deriving (Eq, Ord, Show, Generic, NFDataX)
 
 data ALU = Add Bool | Sub Bool | And | Or | XOr
-    deriving (Eq, Ord, Show, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Generic, NFDataX, TH.Lift)
 
 data ShiftRotate = Shift | Rotate
-    deriving (Eq, Ord, Show, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Generic, NFDataX, TH.Lift)
 
 data Cond = Cond Flag Bool
-    deriving (Eq, Ord, Show, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Generic, NFDataX, TH.Lift)
 
 data Instr
     = MOV LHS RHS

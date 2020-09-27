@@ -5,29 +5,30 @@ import Clash.Prelude
 
 import Hardware.Intel8080
 import Hardware.Intel8080.Steps
+import qualified Language.Haskell.TH.Lift as TH
 
 data InAddr
     = FromPtr
     | FromPort
     | IncrPC
     | IncrSP
-    deriving (Enum, Bounded, Eq, Show)
+    deriving (Show, Eq, Enum, Bounded, Generic, NFDataX, TH.Lift)
 
 data OutAddr
     = ToPtr
     | ToPort
     | DecrSP
-    deriving (Enum, Bounded, Eq, Show)
+    deriving (Show, Eq, Enum, Bounded, Generic, NFDataX, TH.Lift)
 
 data UpdateAC
     = SetAC
     | KeepAC
-    deriving (Show, Eq, Generic, NFDataX)
+    deriving (Show, Eq, Generic, NFDataX, TH.Lift)
 
 data UpdateC
     = SetC
     | KeepC
-    deriving (Show, Eq, Generic, NFDataX)
+    deriving (Show, Eq, Generic, NFDataX, TH.Lift)
 
 data MicroInstr
     = Get Reg
@@ -47,24 +48,24 @@ data MicroInstr
     | Rst (Unsigned 3)
     | SetInt Bool
     | FixupBCD
-    deriving (Show, Generic, NFDataX)
+    deriving (Show, Generic, NFDataX, TH.Lift)
 
 data ALUArg
     = RegA
     | Const01
     | ConstFF
-    deriving (Show, Generic, NFDataX)
+    deriving (Show, Generic, NFDataX, TH.Lift)
 
 data ALU2
     = Inc2
     | Dec2
     | AddHL
-    deriving (Show, Generic, NFDataX)
+    deriving (Show, Generic, NFDataX, TH.Lift)
 
 data ALU0
     = Complement0
     | ConstTrue0
-    deriving (Show, Generic, NFDataX)
+    deriving (Show, Generic, NFDataX, TH.Lift)
 
 type MicroSteps = Steps InAddr MicroInstr OutAddr
 
