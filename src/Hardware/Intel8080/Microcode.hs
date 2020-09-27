@@ -41,6 +41,7 @@ data Effect
     | Rst (Unsigned 3)
     | SetInt Bool
     | FixupBCD
+    | Halt
     deriving (Show, Generic, NFDataX, TH.Lift)
 
 data ALUArg
@@ -261,4 +262,6 @@ microcode OUT = mc $
     imm1 >++>
     step INothing (FromBuf AddrBuf) INothing      >++>
     step INothing (Get rA)          (IJust Port)
+microcode HLT = mc $
+    step INothing Halt INothing
 -- microcode instr = errorX $ show instr
