@@ -3,6 +3,7 @@ module Hardware.Intel8080 where
 import Prelude ()
 -- import Data.Word
 import Clash.Prelude
+import qualified Language.Haskell.TH.Lift as TH
 
 type NumRegs = 8
 type Reg = Index NumRegs
@@ -18,7 +19,7 @@ rH = 4
 rL = 5
 
 data RegPair = Regs Reg Reg | SP
-    deriving (Eq, Ord, Show, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Generic, NFDataX, TH.Lift)
 
 rBC, rDE, rHL :: RegPair
 rBC = Regs rB rC
@@ -50,10 +51,10 @@ data Src
     deriving (Eq, Ord, Show, Generic, NFDataX)
 
 data ALU = ADD | ADC | SUB | SBB | AND | OR | XOR | RotateR | RotateL | ShiftR | ShiftL
-    deriving (Eq, Ord, Show, Enum, Bounded, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Enum, Bounded, Generic, NFDataX, TH.Lift)
 
 data Cond = Cond Flag Bool
-    deriving (Eq, Ord, Show, Generic, NFDataX)
+    deriving (Eq, Ord, Show, Generic, NFDataX, TH.Lift)
 
 data Instr
     = MOV Op Src

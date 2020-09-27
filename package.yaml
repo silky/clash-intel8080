@@ -32,6 +32,7 @@ dependencies:
   - lens
   - singletons
   - extra
+  - th-lift
   - monad-loops
 
 # Anything that Clash uses by default should go here
